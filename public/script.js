@@ -8,10 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/tasks')
             .then(response => response.json())
             .then(tasks => {
-                taskList.innerHTML = ''; // Tøm listen før opdatering
+                taskList.innerHTML = '';
                 tasks.forEach((task, index) => {
                     const li = document.createElement('li');
-                    li.textContent = task; // Her skal 'task' være en streng
+                    li.textContent = task;
+                    li.appendChild(createUpdateButton(index));
                     li.appendChild(createCompleteButton(index));
                     li.appendChild(createDeleteButton(index));
                     taskList.appendChild(li);
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
                 .then(response => response.json())
                 .then(data => {
-                    taskInput.value = ''; // Tøm inputfeltet
+                    taskInput.value = '';
                     fetchTasks();
                 });
         }
@@ -41,6 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = document.createElement('button');
         button.textContent = 'Complete';
         button.className = 'completeBtn';
+        button.addEventListener('click', () => {
+
+            const li = button.parentElement;
+            li.remove();
+            fetch(`/tasks/${index}`, {
+                method: 'DELETE',
+            });
+        });
+        return button;
+    }
+
+    function createUpdateButton(index) {
+        const button = document.createElement('button');
+        button.textContent = 'Update';
+        button.className = 'updateBtn';
         button.addEventListener('click', () => {
             const updatedTask = prompt('Update task:', '');
             if (updatedTask) {
@@ -65,17 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
         button.textContent = 'Delete';
         button.className = 'deleteBtn';
         button.addEventListener('click', () => {
+            const li = button.parentElement;
+            li.remove();
             fetch(`/tasks/${index}`, {
                 method: 'DELETE',
-            })
-                .then(response => response.json())
-                .then(() => {
-                    fetchTasks();
-                });
+            });
         });
         return button;
     }
-
 
     fetchTasks();
 });
